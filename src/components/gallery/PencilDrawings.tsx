@@ -25,7 +25,7 @@ const PencilDrawings = () => {
   };
 
   return (
-    <section className="pt-0 pb-24 px-4 bg-transparent">
+    <section id="drawings-section" className="pt-0 pb-24 px-4 bg-transparent scroll-mt-20">
 
       {/* ── Animated Divider ────────────────────────────────────────────────
            Replaces the old static border-y. The line "draws" itself across
