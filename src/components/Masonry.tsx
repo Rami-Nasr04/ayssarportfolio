@@ -91,6 +91,26 @@ const Masonry: React.FC<MasonryProps> = ({
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
 
+  const { grid, containerHeight } = useMemo(() => {
+    if (!width) return { grid: [], containerHeight: 0 };
+    const colHeights = new Array(columns).fill(0);
+    const gap = 16;
+    const totalGaps = (columns - 1) * gap;
+    const columnWidth = (width - totalGaps) / columns;
+
+    const gridItems = items.map(child => {
+      const col = colHeights.indexOf(Math.min(...colHeights));
+      const x = col * (columnWidth + gap);
+      const height = child.height / 2;
+      const y = colHeights[col];
+
+      colHeights[col] += height + gap;
+      return { ...child, x, y, w: columnWidth, h: height };
+    });
+
+    return { grid: gridItems, containerHeight: Math.max(...colHeights) };
+  }, [columns, items, width]);
+
   const getInitialPosition = (item: GridItem) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return { x: item.x, y: item.y };
@@ -123,24 +143,6 @@ const Masonry: React.FC<MasonryProps> = ({
   useEffect(() => {
     preloadImages(items.map(i => i.img)).then(() => setImagesReady(true));
   }, [items]);
-
-  const grid = useMemo<GridItem[]>(() => {
-    if (!width) return [];
-    const colHeights = new Array(columns).fill(0);
-    const gap = 16;
-    const totalGaps = (columns - 1) * gap;
-    const columnWidth = (width - totalGaps) / columns;
-
-    return items.map(child => {
-      const col = colHeights.indexOf(Math.min(...colHeights));
-      const x = col * (columnWidth + gap);
-      const height = child.height / 2;
-      const y = colHeights[col];
-
-      colHeights[col] += height + gap;
-      return { ...child, x, y, w: columnWidth, h: height };
-    });
-  }, [columns, items, width]);
 
   const hasMounted = useRef(false);
 
@@ -214,7 +216,7 @@ const Masonry: React.FC<MasonryProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full" style={{ height: containerHeight }}>
       {grid.map(item => (
         <div
           key={item.id}

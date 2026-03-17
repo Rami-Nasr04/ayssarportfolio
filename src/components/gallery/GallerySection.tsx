@@ -6,7 +6,6 @@ import legTattoo from "@/assets/leg tattoo.jpeg";
 import ayssarTarabay from "@/assets/ayssarTarabay.png";
 import instagramShot from "@/assets/Screenshot_8-3-2026_21330_www.instagram.com.jpeg";
 
-// Initial items
 const INITIAL_ITEMS = [
   { id: "1", img: legTattoo, url: "#", height: 800 },
   { id: "2", img: ayssarTarabay, url: "#", height: 600 },
@@ -27,20 +26,29 @@ const MORE_ITEMS = [
 
 const GallerySection = () => {
   const [items, setItems] = useState(INITIAL_ITEMS);
-  const [hasMore, setHasMore] = useState(true);
-  const sectionRef = useRef(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   
-  // Task 2: Trigger animation when in viewpoint
+  // Trigger Masonry entrance when visible
   const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
 
-  const loadMore = () => {
-    setItems((prev) => [...prev, ...MORE_ITEMS]);
-    setHasMore(false); // Only allow one "View More" for this mock
+  const handleViewMore = () => {
+    setItems([...INITIAL_ITEMS, ...MORE_ITEMS]);
+    setIsExpanded(true);
+  };
+
+  const handleShowLess = () => {
+    setItems(INITIAL_ITEMS);
+    setIsExpanded(false);
+    // Smooth scroll back to top of section if desired
+    sectionRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <section id="gallery-section" ref={sectionRef} className="min-h-screen py-24 px-4 relative z-40 bg-transparent">
       <div className="w-full max-w-7xl mx-auto">
+        
+        {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -54,29 +62,42 @@ const GallerySection = () => {
           <div className="h-[1px] w-32 bg-gold/50 mx-auto mt-6" />
         </motion.div>
 
-        <div className="w-full min-h-[600px]">
-          {/* Only render Masonry when it enters the viewport to trigger its GSAP animation */}
+        {/* Gallery Content */}
+        <div className="w-full flex flex-col gap-12">
           {isInView && (
-            <div className="flex flex-col gap-12">
-              <Masonry 
-                items={items} 
-                animateFrom="bottom" 
-                stagger={0.06} 
-              />
+            <>
+              {/* Masonry Grid */}
+              <div className="w-full">
+                <Masonry 
+                  items={items} 
+                  animateFrom="bottom" 
+                  stagger={0.06} 
+                />
+              </div>
               
-              {hasMore && (
-                <div className="flex justify-center mt-12">
+              {/* Controls - Placed directly under the images */}
+              <div className="flex justify-center mt-12">
+                {!isExpanded ? (
                   <Button
-                    onClick={loadMore}
+                    onClick={handleViewMore}
                     variant="outline"
                     size="lg"
-                    className="border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300"
+                    className="border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
                   >
                     VIEW MORE WORKS
                   </Button>
-                </div>
-              )}
-            </div>
+                ) : (
+                  <Button
+                    onClick={handleShowLess}
+                    variant="outline"
+                    size="lg"
+                    className="border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
+                  >
+                    SHOW LESS
+                  </Button>
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>
