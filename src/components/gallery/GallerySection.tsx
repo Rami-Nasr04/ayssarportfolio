@@ -107,7 +107,7 @@ const GallerySection = () => {
                     onClick={handleViewMore}
                     variant="outline"
                     size="lg"
-                    className="border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
+                    className="bg-transparent border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
                   >
                     VIEW MORE WORKS
                   </Button>
@@ -116,7 +116,7 @@ const GallerySection = () => {
                     onClick={handleShowLess}
                     variant="outline"
                     size="lg"
-                    className="border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
+                    className="bg-transparent border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
                   >
                     SHOW LESS
                   </Button>

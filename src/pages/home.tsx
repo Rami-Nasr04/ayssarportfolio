@@ -36,10 +36,10 @@ const Home = () => {
   const signatureAlpha = useTransform(scrollYProgress, [0.05, 0.15, 0.35, 0.45], [0, 1, 1, 0]); 
   const signatureY = useTransform(scrollYProgress, [0.05, 0.15], [100, 0]);
 
-  const scrollToGallery = () => {
-    const gallerySection = document.getElementById("gallery-section");
-    if (gallerySection) {
-      gallerySection.scrollIntoView({ behavior: "smooth" });
+  const scrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -86,6 +86,7 @@ const Home = () => {
               <div className="flex flex-col md:flex-row items-center gap-4">
                 <Button 
                   size="lg" 
+                  onClick={() => scrollTo("contact-section")}
                   className="bg-gold text-black font-bold rounded-full px-12 py-8 text-xl hover:bg-gold/80 transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
                 >
                   BOOK NOW
@@ -93,8 +94,8 @@ const Home = () => {
                 
                 <Button 
                   variant="outline"
-                  onClick={scrollToGallery}
-                  className="border-gold text-gold hover:bg-gold hover:text-black rounded-full px-8 py-6 text-lg transition-all duration-300"
+                  onClick={() => scrollTo("gallery-section")}
+                  className="bg-transparent border-gold text-gold hover:bg-gold hover:text-black rounded-full px-8 py-6 text-lg transition-all duration-300"
                 >
                   VIEW GALLERY
                 </Button>
@@ -104,7 +105,7 @@ const Home = () => {
                 animate={{ y: [0, 10, 0] }} 
                 transition={{ duration: 2, repeat: Infinity }} 
                 className="text-gold/50 mt-4 cursor-pointer"
-                onClick={scrollToGallery}
+                onClick={() => scrollTo("signature-section")}
               >
                 <ChevronDown size={48} />
               </motion.div>
@@ -113,7 +114,7 @@ const Home = () => {
         </section>
 
         {/* BLOCK 2: SIGNATURE (Sticky inside a relative container to prevent gaps) */}
-        <section className="h-[150vh] relative">
+        <section id="signature-section" className="h-[150vh] relative">
           <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
             <motion.div style={{ opacity: signatureAlpha, y: signatureY }} className="w-full">
               <SignatureTattoo />

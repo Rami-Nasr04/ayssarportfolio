@@ -98,17 +98,42 @@ const Masonry: React.FC<MasonryProps> = ({
     const totalGaps = (columns - 1) * gap;
     const columnWidth = (width - totalGaps) / columns;
 
-    const gridItems = items.map(child => {
+    const colItems: any[][] = new Array(columns).fill(null).map(() => []);
+
+    items.forEach(child => {
       const col = colHeights.indexOf(Math.min(...colHeights));
       const x = col * (columnWidth + gap);
       const height = child.height / 2;
       const y = colHeights[col];
 
+      const item = { ...child, x, y, w: columnWidth, h: height };
+      colItems[col].push(item);
       colHeights[col] += height + gap;
-      return { ...child, x, y, w: columnWidth, h: height };
     });
 
-    return { grid: gridItems, containerHeight: Math.max(...colHeights) };
+    const maxColHeight = Math.max(...colHeights);
+
+    const adjustedGrid: GridItem[] = [];
+    colItems.forEach((itemsInCol, colIndex) => {
+      const currentHeight = colHeights[colIndex] - gap; 
+      const targetHeight = maxColHeight - gap;
+      
+      if (itemsInCol.length > 0 && currentHeight > 0) {
+        const ratio = targetHeight / currentHeight;
+        let currentY = 0;
+        itemsInCol.forEach(item => {
+          const newHeight = item.h * ratio;
+          adjustedGrid.push({
+            ...item,
+            y: currentY,
+            h: newHeight
+          });
+          currentY += newHeight + gap;
+        });
+      }
+    });
+
+    return { grid: adjustedGrid, containerHeight: maxColHeight };
   }, [columns, items, width]);
 
   const getInitialPosition = (item: GridItem) => {

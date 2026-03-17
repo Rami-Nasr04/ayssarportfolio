@@ -130,7 +130,7 @@ const PencilDrawings = () => {
               onClick={loadMore}
               variant="outline"
               size="lg"
-              className="border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-10 py-6 text-lg transition-all duration-500 group"
+              className="bg-transparent border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-10 py-6 text-lg transition-all duration-500 group"
             >
               <span>EXPLORE MORE STUDIES</span>
               <motion.span

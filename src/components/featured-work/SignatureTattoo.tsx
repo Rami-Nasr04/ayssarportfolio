@@ -108,7 +108,10 @@ const SignatureTattoo = () => {
             viewport={{ once: true }}
             className="pt-6"
           >
-            <button className="px-8 py-4 border-2 border-gold text-gold font-bold hover:bg-gold hover:text-black transition-all duration-300 rounded-none uppercase tracking-widest text-sm">
+            <button 
+              onClick={() => document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" })}
+              className="px-8 py-4 border-2 border-gold text-gold font-bold hover:bg-gold hover:text-black transition-all duration-300 rounded-none uppercase tracking-widest text-sm"
+            >
               Inquire About Similar Pieces
             </button>
           </motion.div>
