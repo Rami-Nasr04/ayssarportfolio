@@ -9,7 +9,7 @@ import ContactForm from "@/components/contact/ContactForm";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 
-const MARQUEE_ITEMS = ["Black & Grey Realism", "Custom Pieces", "Beirut", "By Appointment"];
+const MARQUEE_ITEMS = ["Black & Grey Realism", "Custom Pieces", "Lebanon", "By Appointment"];
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -95,7 +95,7 @@ const Home = () => {
             transition={{ delay: 0.4, duration: 0.8, ease: easeOut }}
             className="text-gold uppercase tracking-[0.4em] md:tracking-[0.5em] text-[11px] md:text-sm font-medium mb-5 md:mb-6"
           >
-            Black &amp; Grey Realism — Beirut
+            Black &amp; Grey Realism — Lebanon
           </motion.p>
 
           <h1 className="font-butler font-black text-[17vw] sm:text-8xl md:text-[9rem] lg:text-[10.5rem] leading-[0.85] tracking-tight text-bone drop-shadow-2xl">

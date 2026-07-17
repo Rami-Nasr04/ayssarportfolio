@@ -7,7 +7,7 @@ import Lightbox from "@/components/gallery/Lightbox";
 const DETAILS = [
   { icon: PenTool, label: "Style", value: "Black & Grey Realism" },
   { icon: Layers, label: "Scale", value: "Full Leg" },
-  { icon: Clock, label: "Process", value: "Multiple Sessions" },
+  { icon: Clock, label: "Process", value: "Convention" },
   { icon: Award, label: "Design", value: "Custom, One of One" },
 ];
 
@@ -158,9 +158,9 @@ const SignatureTattoo = () => {
               viewport={{ once: true }}
               className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-xl"
             >
-              A laurel-crowned seer, quill in hand, an hourglass running out beneath —
-              a full-leg composition built session over session to move with the body.
-              This is the piece Ayssar stands beside when he shows his work.
+              A laurel-crowned oracle, quill poised in hand, an hourglass beneath marking time's passage—
+              a full-leg composition conceived and executed during an international convention in Turkey. The design is, 
+              designed to flow and evolve with the body's movement. It's the work Ayssar leads with.
             </motion.p>
           </div>
 
