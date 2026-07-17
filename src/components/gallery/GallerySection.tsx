@@ -80,7 +80,7 @@ const GallerySection = () => {
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-gold transition-colors text-xs uppercase tracking-[0.25em] py-2"
           >
-            Hundreds more on Instagram →
+            More & more on Instagram →
           </a>
         </div>
       </div>
