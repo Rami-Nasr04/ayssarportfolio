@@ -7,9 +7,10 @@ const useMedia = (queries: string[], values: number[], defaultValue: number): nu
   const [value, setValue] = useState<number>(get);
 
   useEffect(() => {
-    const handler = () => setValue(get);
+    const handler = () => setValue(values[queries.findIndex(q => matchMedia(q).matches)] ?? defaultValue);
     queries.forEach(q => matchMedia(q).addEventListener('change', handler));
     return () => queries.forEach(q => matchMedia(q).removeEventListener('change', handler));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries]);
 
   return value;
@@ -45,14 +46,16 @@ const preloadImages = async (urls: string[]): Promise<void> => {
   );
 };
 
-interface Item {
+export interface MasonryItem {
   id: string;
   img: string;
-  url: string;
-  height: number;
+  title: string;
+  detail?: string;
+  /** width / height of the source image */
+  aspect: number;
 }
 
-interface GridItem extends Item {
+interface GridItem extends MasonryItem {
   x: number;
   y: number;
   w: number;
@@ -60,50 +63,47 @@ interface GridItem extends Item {
 }
 
 interface MasonryProps {
-  items: Item[];
+  items: MasonryItem[];
   ease?: string;
   duration?: number;
   stagger?: number;
-  animateFrom?: 'bottom' | 'top' | 'left' | 'right' | 'center' | 'random';
-  scaleOnHover?: boolean;
-  hoverScale?: number;
-  blurToFocus?: boolean;
-  colorShiftOnHover?: boolean;
+  onItemClick?: (item: MasonryItem) => void;
 }
+
+/** Columns are equalized by gently cropping (bg is object-cover); the stretch
+ *  ratio is clamped so no image loses more than ~12% of its height. */
+const STRETCH_MIN = 0.88;
+const STRETCH_MAX = 1.12;
 
 const Masonry: React.FC<MasonryProps> = ({
   items,
   ease = 'power3.out',
   duration = 0.6,
   stagger = 0.05,
-  animateFrom = 'bottom',
-  scaleOnHover = true,
-  hoverScale = 0.95,
-  blurToFocus = true,
-  colorShiftOnHover = false
+  onItemClick
 }) => {
   const columns = useMedia(
-    ['(min-width:1500px)', '(min-width:1000px)', '(min-width:600px)', '(min-width:400px)'],
-    [5, 4, 3, 2],
-    1
+    ['(min-width:1280px)', '(min-width:768px)', '(min-width:480px)'],
+    [3, 3, 2],
+    2
   );
 
   const [containerRef, { width }] = useMeasure<HTMLDivElement>();
   const [imagesReady, setImagesReady] = useState(false);
 
   const { grid, containerHeight } = useMemo(() => {
-    if (!width) return { grid: [], containerHeight: 0 };
+    if (!width) return { grid: [] as GridItem[], containerHeight: 0 };
     const colHeights = new Array(columns).fill(0);
-    const gap = 16;
+    const gap = width < 640 ? 10 : 20;
     const totalGaps = (columns - 1) * gap;
     const columnWidth = (width - totalGaps) / columns;
 
-    const colItems: any[][] = new Array(columns).fill(null).map(() => []);
+    const colItems: GridItem[][] = new Array(columns).fill(null).map(() => []);
 
     items.forEach(child => {
       const col = colHeights.indexOf(Math.min(...colHeights));
       const x = col * (columnWidth + gap);
-      const height = child.height / 2;
+      const height = columnWidth / child.aspect;
       const y = colHeights[col];
 
       const item = { ...child, x, y, w: columnWidth, h: height };
@@ -115,19 +115,15 @@ const Masonry: React.FC<MasonryProps> = ({
 
     const adjustedGrid: GridItem[] = [];
     colItems.forEach((itemsInCol, colIndex) => {
-      const currentHeight = colHeights[colIndex] - gap; 
+      const currentHeight = colHeights[colIndex] - gap;
       const targetHeight = maxColHeight - gap;
-      
+
       if (itemsInCol.length > 0 && currentHeight > 0) {
-        const ratio = targetHeight / currentHeight;
+        const ratio = Math.min(STRETCH_MAX, Math.max(STRETCH_MIN, targetHeight / currentHeight));
         let currentY = 0;
         itemsInCol.forEach(item => {
           const newHeight = item.h * ratio;
-          adjustedGrid.push({
-            ...item,
-            y: currentY,
-            h: newHeight
-          });
+          adjustedGrid.push({ ...item, y: currentY, h: newHeight });
           currentY += newHeight + gap;
         });
       }
@@ -135,35 +131,6 @@ const Masonry: React.FC<MasonryProps> = ({
 
     return { grid: adjustedGrid, containerHeight: maxColHeight };
   }, [columns, items, width]);
-
-  const getInitialPosition = (item: GridItem) => {
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (!containerRect) return { x: item.x, y: item.y };
-
-    let direction = animateFrom;
-    if (animateFrom === 'random') {
-      const dirs = ['top', 'bottom', 'left', 'right'];
-      direction = dirs[Math.floor(Math.random() * dirs.length)] as typeof animateFrom;
-    }
-
-    switch (direction) {
-      case 'top':
-        return { x: item.x, y: -200 };
-      case 'bottom':
-        return { x: item.x, y: window.innerHeight + 200 };
-      case 'left':
-        return { x: -200, y: item.y };
-      case 'right':
-        return { x: window.innerWidth + 200, y: item.y };
-      case 'center':
-        return {
-          x: containerRect.width / 2 - item.w / 2,
-          y: containerRect.height / 2 - item.h / 2
-        };
-      default:
-        return { x: item.x, y: item.y + 100 };
-    }
-  };
 
   useEffect(() => {
     preloadImages(items.map(i => i.img)).then(() => setImagesReady(true));
@@ -179,21 +146,12 @@ const Masonry: React.FC<MasonryProps> = ({
       const animProps = { x: item.x, y: item.y, width: item.w, height: item.h };
 
       if (!hasMounted.current) {
-        const start = getInitialPosition(item);
         gsap.fromTo(
           selector,
-          {
-            opacity: 0,
-            x: start.x,
-            y: start.y,
-            width: item.w,
-            height: item.h,
-            ...(blurToFocus && { filter: 'blur(10px)' })
-          },
+          { opacity: 0, x: item.x, y: item.y + 48, width: item.w, height: item.h },
           {
             opacity: 1,
             ...animProps,
-            ...(blurToFocus && { filter: 'blur(0px)' }),
             duration: 0.8,
             ease: 'power3.out',
             delay: index * stagger
@@ -201,6 +159,7 @@ const Masonry: React.FC<MasonryProps> = ({
         );
       } else {
         gsap.to(selector, {
+          opacity: 1,
           ...animProps,
           duration,
           ease,
@@ -210,35 +169,7 @@ const Masonry: React.FC<MasonryProps> = ({
     });
 
     hasMounted.current = true;
-  }, [grid, imagesReady, stagger, animateFrom, blurToFocus, duration, ease]);
-
-  const handleMouseEnter = (id: string, element: HTMLElement) => {
-    if (scaleOnHover) {
-      gsap.to(`[data-key="${id}"]`, {
-        scale: hoverScale,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    }
-    if (colorShiftOnHover) {
-      const overlay = element.querySelector('.color-overlay') as HTMLElement;
-      if (overlay) gsap.to(overlay, { opacity: 0.3, duration: 0.3 });
-    }
-  };
-
-  const handleMouseLeave = (id: string, element: HTMLElement) => {
-    if (scaleOnHover) {
-      gsap.to(`[data-key="${id}"]`, {
-        scale: 1,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    }
-    if (colorShiftOnHover) {
-      const overlay = element.querySelector('.color-overlay') as HTMLElement;
-      if (overlay) gsap.to(overlay, { opacity: 0, duration: 0.3 });
-    }
-  };
+  }, [grid, imagesReady, stagger, duration, ease]);
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ height: containerHeight }}>
@@ -246,18 +177,30 @@ const Masonry: React.FC<MasonryProps> = ({
         <div
           key={item.id}
           data-key={item.id}
-          className="absolute box-content"
-          style={{ willChange: 'transform, width, height, opacity' }}
-          onClick={() => window.open(item.url, '_blank', 'noopener')}
-          onMouseEnter={e => handleMouseEnter(item.id, e.currentTarget)}
-          onMouseLeave={e => handleMouseLeave(item.id, e.currentTarget)}
+          role="button"
+          tabIndex={0}
+          aria-label={`View ${item.title}`}
+          className="absolute box-border cursor-zoom-in overflow-hidden group opacity-0"
+          style={{ willChange: 'transform, width, height, opacity', backgroundColor: '#101010' }}
+          onClick={() => onItemClick?.(item)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onItemClick?.(item);
+            }
+          }}
         >
-          <div
-            className="relative w-full h-full bg-cover bg-center rounded-[10px] shadow-[0px_10px_50px_-10px_rgba(0,0,0,0.2)] uppercase text-[10px] leading-[10px]"
-            style={{ backgroundImage: `url(${item.img})` }}
-          >
-            {colorShiftOnHover && (
-              <div className="color-overlay absolute inset-0 rounded-[10px] bg-gradient-to-tr from-pink-500/50 to-sky-500/50 opacity-0 pointer-events-none" />
+          <img
+            src={item.img}
+            alt={item.title}
+            loading="lazy"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          />
+          {/* Caption */}
+          <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 via-black/40 to-transparent pt-16 pb-4 px-5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 transition-all duration-500">
+            <p className="font-butler text-lg text-bone tracking-wide">{item.title}</p>
+            {item.detail && (
+              <p className="text-muted-foreground text-xs uppercase tracking-[0.2em] mt-1">{item.detail}</p>
             )}
           </div>
         </div>

@@ -1,131 +1,97 @@
-import { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import Masonry from "@/components/Masonry";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Masonry, { type MasonryItem } from "@/components/Masonry";
 import { Button } from "@/components/ui/button";
-import legTattoo from "@/assets/leg tattoo.jpeg";
-import ayssarTarabay from "@/assets/ayssarTarabay.png";
-import instagramShot from "@/assets/Screenshot_8-3-2026_21330_www.instagram.com.jpeg";
-import ScrollFloat from "@/components/ScrollFloat";
+import Lightbox from "./Lightbox";
+import { SELECTED_WORKS, MORE_WORKS } from "@/assets/work";
 
-const INITIAL_ITEMS = [
-  { id: "1", img: legTattoo, url: "#", height: 800 },
-  { id: "2", img: ayssarTarabay, url: "#", height: 600 },
-  { id: "3", img: legTattoo, url: "#", height: 700 },
-  { id: "4", img: ayssarTarabay, url: "#", height: 900 },
-  { id: "5", img: instagramShot, url: "#", height: 600 },
-  { id: "6", img: ayssarTarabay, url: "#", height: 800 },
-  { id: "7", img: instagramShot, url: "#", height: 750 },
-  { id: "8", img: legTattoo, url: "#", height: 650 },
-  { id: "9", img: ayssarTarabay, url: "#", height: 850 },
-  { id: "10", img: instagramShot, url: "#", height: 700 },
-  // { id: "11", img: legTattoo, url: "#", height: 900 },
-  // { id: "12", img: ayssarTarabay, url: "#", height: 600 },
-];
-
-const MORE_ITEMS = [
-  { id: "13", img: legTattoo, url: "#", height: 700 },
-  { id: "14", img: instagramShot, url: "#", height: 900 },
-  { id: "15", img: ayssarTarabay, url: "#", height: 600 },
-  { id: "16", img: legTattoo, url: "#", height: 850 },
-  { id: "17", img: ayssarTarabay, url: "#", height: 750 },
-  { id: "18", img: instagramShot, url: "#", height: 650 },
-  { id: "19", img: legTattoo, url: "#", height: 800 },
-  { id: "20", img: ayssarTarabay, url: "#", height: 700 },
-  { id: "21", img: instagramShot, url: "#", height: 900 },
-  { id: "22", img: legTattoo, url: "#", height: 600 },
-];
+const ALL_WORKS = [...SELECTED_WORKS, ...MORE_WORKS];
 
 const GallerySection = () => {
-  const [items, setItems] = useState(INITIAL_ITEMS);
   const [isExpanded, setIsExpanded] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  // Trigger Masonry entrance when visible
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
-
-  const handleViewMore = () => {
-    setItems([...INITIAL_ITEMS, ...MORE_ITEMS]);
-    setIsExpanded(true);
-  };
+  const items = isExpanded ? ALL_WORKS : SELECTED_WORKS;
 
   const handleShowLess = () => {
-    // 1. Collapse the items first so the page height updates
-    setItems(INITIAL_ITEMS);
     setIsExpanded(false);
-
-    // 2. Use a micro-task to wait for the DOM to update, then scroll to the new correct position
     setTimeout(() => {
-      const nextSection = document.getElementById("drawings-section");
-      if (nextSection) {
-        nextSection.scrollIntoView({ behavior: "smooth" });
-      }
+      document.getElementById("gallery-section")?.scrollIntoView({ behavior: "smooth" });
     }, 10);
   };
 
+  const openLightbox = (item: MasonryItem) => {
+    const idx = ALL_WORKS.findIndex(w => w.id === item.id);
+    if (idx !== -1) setLightboxIndex(idx);
+  };
+
   return (
-    <section
-      id="gallery-section"
-      ref={sectionRef}
-      className="min-h-screen py-24 px-4 relative z-40 bg-transparent"
-    >
-      <div className="w-full max-w-7xl mx-auto">
-        {/* Header */}
+    <section id="gallery-section" className="py-24 md:py-36 px-4 md:px-8 bg-background scroll-mt-16">
+      <div className="w-full max-w-6xl mx-auto">
+        {/* Heading */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center mb-20"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, amount: 0.4 }}
+          className="mb-12 md:mb-20"
         >
-          <h2 className="font-butler text-5xl md:text-8xl text-gold uppercase tracking-tighter">
-            <ScrollFloat
-              animationDuration={1}
-              ease="back.inOut(2)"
-              scrollStart="center bottom+=50%"
-              scrollEnd="bottom bottom-=40%"
-              stagger={0.1}
-            >
-              Portfolio
-            </ScrollFloat>
-          </h2>
-          <div className="h-[1px] w-32 bg-gold/50 mx-auto mt-6" />
+          <p className="text-gold uppercase tracking-[0.5em] text-xs font-medium mb-4 md:mb-5">Portfolio</p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+            <div className="overflow-hidden">
+              <motion.h2
+                initial={{ y: "100%" }}
+                whileInView={{ y: 0 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                viewport={{ once: true }}
+                className="font-butler text-[2.75rem] leading-none md:text-7xl text-bone uppercase tracking-tight"
+              >
+                Selected works
+              </motion.h2>
+            </div>
+            <p className="text-muted-foreground text-sm md:text-base max-w-sm leading-relaxed">
+              A selection of large-scale black &amp; grey realism — statues,
+              portraits, and custom compositions built to follow the body.
+            </p>
+          </div>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 1.1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true }}
+            className="h-px w-full bg-linear-to-r from-gold/50 via-border to-transparent mt-8 md:mt-10 origin-left"
+          />
         </motion.div>
 
-        {/* Gallery Content */}
-        <div className="w-full flex flex-col gap-12">
-          {isInView && (
-            <>
-              {/* Masonry Grid */}
-              <div className="w-full">
-                <Masonry items={items} animateFrom="bottom" stagger={0.06} />
-              </div>
+        {/* Masonry grid — all breakpoints */}
+        <Masonry items={items} stagger={0.05} onItemClick={openLightbox} />
 
-              {/* Controls - Placed directly under the images */}
-              <div className="flex justify-center mt-12">
-                {!isExpanded ? (
-                  <Button
-                    onClick={handleViewMore}
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
-                  >
-                    VIEW MORE WORKS
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleShowLess}
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border-gold/30 text-gold hover:bg-gold hover:text-black rounded-full px-12 py-8 text-xl transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
-                  >
-                    SHOW LESS
-                  </Button>
-                )}
-              </div>
-            </>
-          )}
+        <div className="flex flex-col items-center gap-5 mt-12 md:mt-16">
+          <Button
+            onClick={isExpanded ? handleShowLess : () => setIsExpanded(true)}
+            variant="outline"
+            className="bg-transparent dark:bg-transparent border-gold/30 text-gold hover:bg-gold hover:text-black dark:hover:bg-gold dark:hover:text-black rounded-full px-10 py-6 text-sm uppercase tracking-[0.2em] transition-colors duration-300 min-h-12"
+          >
+            {isExpanded ? "Show less" : "View the full gallery"}
+          </Button>
+          <a
+            href="https://www.instagram.com/ayssar.tarabay.tattoos"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-gold transition-colors text-xs uppercase tracking-[0.25em] py-2"
+          >
+            Hundreds more on Instagram →
+          </a>
         </div>
       </div>
+
+      {/* Lightbox over the full collection */}
+      <Lightbox
+        items={ALL_WORKS}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        onNavigate={setLightboxIndex}
+      />
     </section>
   );
 };

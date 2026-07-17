@@ -1,143 +1,192 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import Particles from "@/components/Particles";
 import { Button } from "@/components/ui/button";
-import ayssarTarabay from "@/assets/ayssarTarabay.png";
+import { ayssarPortrait } from "@/assets/work";
 import SignatureTattoo from "@/components/featured-work/SignatureTattoo";
 import GallerySection from "@/components/gallery/GallerySection";
-import PencilDrawings from "@/components/gallery/PencilDrawings";
 import ContactForm from "@/components/contact/ContactForm";
 import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+
+const MARQUEE_ITEMS = ["Black & Grey Realism", "Custom Pieces", "Beirut", "By Appointment"];
+
+const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const Home = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Track scroll progress across the entire page
+  const heroRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const { scrollYProgress: pageProgress } = useScroll();
+  const progressScale = useSpring(pageProgress, { stiffness: 120, damping: 30, mass: 0.3 });
+
   const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
+    target: heroRef,
+    offset: ["start start", "end start"],
   });
 
-  // --- 1. Background Layers (Sticky) ---
-  // Hero image only fades out at the very beginning
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 1.1]);
-  
-  // Particles start invisible and fade in as hero leaves
-  const particleOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1]);
-
-  // --- 2. Animations for Hero ---
-  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -100]);
-  const heroAlpha = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-
-  // --- 3. Animations for Signature ---
-  // We want the signature to float in as the hero leaves
-  const signatureAlpha = useTransform(scrollYProgress, [0.05, 0.15, 0.35, 0.45], [0, 1, 1, 0]); 
-  const signatureY = useTransform(scrollYProgress, [0.05, 0.15], [100, 0]);
+  const heroImageY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const heroContentY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const heroContentAlpha = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   const scrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const marqueeLine = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
+    .map(item => item)
+    .join("  ·  ");
+
   return (
-    <div ref={containerRef} className="relative bg-black text-white selection:bg-gold/30">
-      
-      {/* PERSISTENT BACKGROUND (Fixed to prevent double scroll issues) */}
-      <div className="fixed inset-0 w-full h-screen overflow-hidden pointer-events-none z-0">
-        {/* Hero Background */}
-        <motion.div 
-          style={{ opacity: heroOpacity, scale: heroScale }} 
-          className="absolute inset-0"
-        >
-          <img src={ayssarTarabay} alt="Ayssar Background" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/70" />
+    <div className="relative bg-background text-foreground font-sans">
+      {/* Reading progress hairline */}
+      <motion.div
+        aria-hidden
+        style={{ scaleX: progressScale }}
+        className="fixed top-0 left-0 right-0 h-0.5 bg-gold z-[60] origin-left"
+      />
+
+      <Header />
+
+      {/* HERO */}
+      <section ref={heroRef} className="relative h-svh min-h-[600px] overflow-hidden" aria-label="Introduction">
+        {/* Portrait of Ayssar at work — slow settle on load */}
+        <motion.div style={{ y: heroImageY }} className="absolute inset-0">
+          <motion.img
+            src={ayssarPortrait}
+            alt="Ayssar Tarabay tattooing in his studio"
+            initial={prefersReducedMotion ? false : { scale: 1.12 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 2.4, ease: easeOut }}
+            className="w-full h-full object-cover"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-background/10" />
+          <div className="absolute inset-0 bg-linear-to-r from-background/60 via-transparent to-background/60" />
         </motion.div>
 
-        {/* Particles Background (Always active after hero leaves) */}
-        <motion.div 
-          style={{ opacity: particleOpacity }} 
-          className="absolute inset-0"
+        {/* Signature element: gallery-frame hairline that draws itself */}
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.2 }}
+          className="absolute inset-4 md:inset-6 border border-gold/25 pointer-events-none"
+        />
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.5, ease: easeOut }}
+          className="absolute inset-4 md:inset-6 pointer-events-none"
         >
-          <Particles 
-            particleColors={["#ffffff", "#d4af37"]} 
-            particleCount={250} 
-            speed={0.15} 
-            moveParticlesOnHover
-          />
+          <span className="absolute -top-px -left-px w-8 h-8 border-t-2 border-l-2 border-gold/60" />
+          <span className="absolute -top-px -right-px w-8 h-8 border-t-2 border-r-2 border-gold/60" />
+          <span className="absolute -bottom-px -left-px w-8 h-8 border-b-2 border-l-2 border-gold/60" />
+          <span className="absolute -bottom-px -right-px w-8 h-8 border-b-2 border-r-2 border-gold/60" />
         </motion.div>
+
+        {/* Content */}
+        <motion.div
+          style={{ y: heroContentY, opacity: heroContentAlpha }}
+          className="relative z-10 h-full flex flex-col items-center justify-end pb-16 md:pb-24 px-6 text-center"
+        >
+          <motion.p
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8, ease: easeOut }}
+            className="text-gold uppercase tracking-[0.4em] md:tracking-[0.5em] text-[11px] md:text-sm font-medium mb-5 md:mb-6"
+          >
+            Black &amp; Grey Realism — Beirut
+          </motion.p>
+
+          <h1 className="font-butler font-black text-[17vw] sm:text-8xl md:text-[9rem] lg:text-[10.5rem] leading-[0.85] tracking-tight text-bone drop-shadow-2xl">
+            <span className="block overflow-hidden">
+              <motion.span
+                className="block"
+                initial={prefersReducedMotion ? false : { y: "105%" }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.55, duration: 1, ease: easeOut }}
+              >
+                AYSSAR
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden">
+              <motion.span
+                className="block text-gold-gradient pb-[0.08em]"
+                initial={prefersReducedMotion ? false : { y: "105%" }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.7, duration: 1, ease: easeOut }}
+              >
+                TARABAY
+              </motion.span>
+            </span>
+          </h1>
+
+          <motion.div
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.05, duration: 0.8, ease: easeOut }}
+            className="mt-8 md:mt-10 flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full sm:w-auto max-w-md"
+          >
+            <Button
+              size="lg"
+              onClick={() => scrollTo("contact-section")}
+              className="w-full sm:w-auto bg-gold text-black font-bold rounded-full px-10 py-6 md:py-7 text-sm md:text-base tracking-[0.15em] uppercase hover:bg-bone transition-colors duration-300 min-h-12"
+            >
+              Book a session
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => scrollTo("gallery-section")}
+              className="w-full sm:w-auto bg-transparent dark:bg-transparent dark:hover:bg-transparent border-bone/30 text-bone hover:border-gold hover:text-gold hover:bg-transparent rounded-full px-10 py-6 md:py-7 text-sm md:text-base tracking-[0.15em] uppercase transition-colors duration-300 min-h-12"
+            >
+              View the work
+            </Button>
+          </motion.div>
+
+          <motion.button
+            aria-label="Scroll to gallery"
+            onClick={() => scrollTo("gallery-section")}
+            initial={prefersReducedMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1, y: [0, 8, 0] }}
+            transition={{
+              opacity: { delay: 1.4, duration: 0.6 },
+              y: { duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 1.4 },
+            }}
+            className="mt-8 md:mt-10 text-gold/40 hover:text-gold transition-colors cursor-pointer p-2"
+          >
+            <ChevronDown size={28} />
+          </motion.button>
+        </motion.div>
+      </section>
+
+      {/* MARQUEE STRIP */}
+      <div aria-hidden className="relative overflow-hidden border-y border-border bg-background py-5 md:py-7">
+        <div className="animate-marquee flex whitespace-nowrap w-max">
+          {[0, 1].map(copy => (
+            <span
+              key={copy}
+              className="font-butler font-light uppercase text-2xl md:text-4xl tracking-[0.2em] text-stroke-gold pr-8"
+            >
+              {marqueeLine}&nbsp;&nbsp;·&nbsp;&nbsp;
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* CONTENT OVERLAY (Uses natural document flow) */}
-      <div className="relative z-10 w-full">
-        
-        {/* BLOCK 1: HERO */}
-        <section className="h-screen flex items-center justify-center relative">
-          <motion.div style={{ y: heroY, opacity: heroAlpha }} className="flex flex-col items-center gap-8 px-4">
-            <h1 className="font-butler text-6xl md:text-9xl text-white text-center leading-[0.9] tracking-tighter drop-shadow-2xl">
-              AYSSAR TARABAY<br />
-              <span className="text-gold">TATTOOS</span>
-            </h1>
-            
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <Button 
-                  size="lg" 
-                  onClick={() => scrollTo("contact-section")}
-                  className="bg-gold text-black font-bold rounded-full px-12 py-8 text-xl hover:bg-gold/80 transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                >
-                  BOOK NOW
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => scrollTo("gallery-section")}
-                  className="bg-transparent border-gold text-gold hover:bg-gold hover:text-black rounded-full px-8 py-6 text-lg transition-all duration-300"
-                >
-                  VIEW GALLERY
-                </Button>
-              </div>
+      {/* SELECTED WORKS */}
+      <GallerySection />
 
-              <motion.div 
-                animate={{ y: [0, 10, 0] }} 
-                transition={{ duration: 2, repeat: Infinity }} 
-                className="text-gold/50 mt-4 cursor-pointer"
-                onClick={() => scrollTo("signature-section")}
-              >
-                <ChevronDown size={48} />
-              </motion.div>
-            </div>
-          </motion.div>
-        </section>
+      {/* SIGNATURE PIECE */}
+      <div id="signature-section" className="bg-luxury-gradient scroll-mt-16">
+        <SignatureTattoo />
+      </div>
 
-        {/* BLOCK 2: SIGNATURE (Sticky inside a relative container to prevent gaps) */}
-        <section id="signature-section" className="h-[150vh] relative">
-          <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
-            <motion.div style={{ opacity: signatureAlpha, y: signatureY }} className="w-full">
-              <SignatureTattoo />
-            </motion.div>
-          </div>
-        </section>
+      {/* BOOKING — ContactForm renders its own #contact-section */}
+      <ContactForm />
 
-        {/* BLOCK 3: GALLERY (Natural Flow) */}
-        <div className="bg-transparent">
-          <GallerySection />
-        </div>
-
-        {/* BLOCK 4: PENCIL DRAWINGS */}
-        <div className="bg-transparent">
-          <PencilDrawings />
-        </div>
-
-        {/* BLOCK 5: CONTACT */}
-        <div className="bg-transparent">
-          <ContactForm />
-        </div>
-
-        {/* FOOTER */}
+      {/* FOOTER */}
+      <div id="footer">
         <Footer />
       </div>
     </div>

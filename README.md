@@ -1,75 +1,59 @@
-# React + TypeScript + Vite
+# Ayssar Tarabay — Tattoo Artist Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dark-luxury single-page portfolio for [Ayssar Tarabay](https://www.instagram.com/ayssar.tarabay.tattoos),
+a black & grey realism tattoo artist based in Beirut. Built to showcase large-scale
+work — full sleeves, statues, portraits — and convert visitors into booking inquiries.
 
-Currently, two official plugins are available:
+**Live:** https://ayssartarabaytattoo.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Stack
 
-## React Compiler
+- **React 19** + **TypeScript** (strict) + **Vite 7**
+- **Tailwind CSS 4** with semantic design tokens (near-black `#050505`, bone `#ECE8E1`, gold `#D4AF37`)
+- **Framer Motion** for choreographed reveals; **GSAP** for the masonry grid
+- **react-zoom-pan-pinch** for the pinch/zoom lightbox
+- **Butler Stencil** (local woff2, three weights) + Inter
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Features
 
-Note: This will impact Vite dev & build performances.
+- **Hero** — full-bleed portrait with a load choreography: the gold gallery-frame
+  draws in, the name rises line by line in Butler Black, CTAs settle last.
+- **Marquee strip** — hollow-stroke Butler Light banner scrolling the studio's terms.
+- **Gallery** — masonry grid of selected works built from true image aspect ratios
+  (2 columns on phones, 3 on desktop), lazy-loaded, with hover captions, plus a
+  pointer to the full body of work on Instagram.
+- **Lightbox** — full-collection navigation: swipe on touch, arrow keys on desktop,
+  pinch/double-tap zoom up to 8×, piece title + counter.
+- **Signature slider** — two views of the full-leg centerpiece: Ayssar beside the
+  finished work, then the piece itself. Swipe or arrows.
+- **Booking** — split panel with a macro process shot; submits via a prefilled
+  WhatsApp message and offers an Instagram DM fallback (no backend required).
+- **SEO** — full meta/OG/Twitter set, `TattooParlor` JSON-LD, canonical URL,
+  sitemap, robots.txt, custom favicon + touch icons, preloaded display fonts.
+- **Accessibility & motion safety** — focus-visible rings, aria labels, keyboard
+  navigation everywhere, `prefers-reduced-motion` respected globally.
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev        # Vite dev server
+npm run build      # tsc + production build
+npm run lint       # ESLint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Image pipeline
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Photo originals (HEIC / oversized PNG / WhatsApp exports) live in
+`src/assets/tattoos/` and are **never imported directly**. Web-ready JPEGs
+(max 1600px, q82; hero at higher budget) live in `src/assets/work/` with a typed
+manifest in `src/assets/work/index.ts` — id, title, placement detail, and aspect
+ratio per piece. The masonry layout and lightbox both read from that single manifest.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Conversion is done with a PowerShell/WIC script (handles HEIC decode + EXIF
+rotation on Windows with no external tools). To add new photos: convert into
+`src/assets/work/`, then append an entry to the manifest.
+
+## Deploy
+
+Hosted on Vercel (`vercel.json` — framework preset `vite`). Push to `master` deploys.

@@ -1,48 +1,91 @@
-import { Instagram, Twitter, Facebook, Mail, MapPin } from "lucide-react";
+import { Instagram, Mail, MapPin } from "lucide-react";
+
+// TODO(rami): confirm real studio info, email, and Instagram handle before launch
+const CONTACT = {
+  email: "aysartarabay@gmail.com",
+  phoneDisplay: "+961 76 746 628",
+  phoneHref: "tel:+96176746628",
+  instagram: "@ayssar.tarabay.tattoos",
+  instagramUrl: "https://www.instagram.com/ayssar.tarabay.tattoos",
+  location: "Beirut, Lebanon",
+  mapsUrl: "https://maps.app.goo.gl/DsRikdFjn9qk7nS1A",
+};
 
 const Footer = () => {
   return (
-    <footer className="bg-black py-20 px-4 border-t border-white/5">
-      <div className="max-w-7xl mx-auto flex flex-col items-center">
-        {/* Logo / Name */}
-        <div className="mb-12 text-center">
-          <h2 className="font-butler text-3xl text-white tracking-widest uppercase">Ayssar Tarabay</h2>
-          <div className="h-[1px] w-12 bg-gold/50 mx-auto mt-4" />
+    <footer className="bg-background py-24 md:py-32 px-6 relative overflow-hidden">
+      {/* Hairline */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
+
+      <div className="max-w-6xl mx-auto flex flex-col items-center">
+        {/* Name */}
+        <div className="mb-16 md:mb-20 text-center">
+          <h2 className="font-butler text-5xl md:text-7xl text-bone tracking-tight uppercase leading-none">
+            Ayssar <span className="text-gold-gradient">Tarabay</span>
+          </h2>
+          <p className="text-gold/50 text-[10px] uppercase tracking-[0.5em] mt-6 font-medium">
+            Black &amp; Grey Realism
+          </p>
         </div>
 
-        {/* Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full mb-16">
-          <div className="flex flex-col items-center text-center space-y-4">
-            <MapPin className="text-gold" size={24} />
-            <h3 className="text-white/40 text-xs uppercase tracking-widest">Studio Location</h3>
-            <p className="text-white text-sm">Beirut, Lebanon<br />Luxury Ink Studio, Floor 4</p>
+        {/* Contact */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 w-full mb-20 max-w-4xl">
+          <div className="flex flex-col items-center text-center">
+            <MapPin className="text-gold mb-5" size={22} aria-hidden />
+            <h3 className="text-muted-foreground text-[10px] uppercase tracking-[0.3em] mb-3 font-semibold">
+              Studio
+            </h3>
+            <a
+              href={CONTACT.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-bone text-lg font-medium tracking-tight hover:text-gold transition-colors"
+            >
+              {CONTACT.location}
+            </a>
+            <span className="text-muted-foreground/70 text-xs mt-1 uppercase tracking-[0.2em]">
+              Open in Google Maps
+            </span>
           </div>
-          <div className="flex flex-col items-center text-center space-y-4">
-            <Mail className="text-gold" size={24} />
-            <h3 className="text-white/40 text-xs uppercase tracking-widest">Inquiries</h3>
-            <p className="text-white text-sm">ayssar.tattoos@gmail.com</p>
+
+          <div className="flex flex-col items-center text-center">
+            <Mail className="text-gold mb-5" size={22} aria-hidden />
+            <h3 className="text-muted-foreground text-[10px] uppercase tracking-[0.3em] mb-3 font-semibold">
+              Inquiries
+            </h3>
+            <a
+              href={`mailto:${CONTACT.email}`}
+              className="text-bone text-lg font-medium tracking-tight hover:text-gold transition-colors break-all"
+            >
+              {CONTACT.email}
+            </a>
+            <a
+              href={CONTACT.phoneHref}
+              className="text-bone text-lg font-medium tracking-tight hover:text-gold transition-colors mt-1"
+            >
+              {CONTACT.phoneDisplay}
+            </a>
           </div>
-          <div className="flex flex-col items-center text-center space-y-4">
-            <div className="flex gap-6">
-              <a href="#" className="text-white/60 hover:text-gold transition-colors">
-                <Instagram size={24} />
-              </a>
-              <a href="#" className="text-white/60 hover:text-gold transition-colors">
-                <Twitter size={24} />
-              </a>
-              <a href="#" className="text-white/60 hover:text-gold transition-colors">
-                <Facebook size={24} />
-              </a>
-            </div>
-            <h3 className="text-white/40 text-xs uppercase tracking-widest">Social Media</h3>
-            <p className="text-white text-sm">@ayssar_tarabay_tattoos</p>
+
+          <div className="flex flex-col items-center text-center">
+            <Instagram className="text-gold mb-5" size={22} aria-hidden />
+            <h3 className="text-muted-foreground text-[10px] uppercase tracking-[0.3em] mb-3 font-semibold">
+              Instagram
+            </h3>
+            <a
+              href={CONTACT.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-bone text-lg font-medium tracking-tight hover:text-gold transition-colors"
+            >
+              {CONTACT.instagram}
+            </a>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="w-full pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-white/20 text-[10px] uppercase tracking-[0.2em]">
-          <p>© 2026 Ayssar Tarabay. All Rights Reserved.</p>
-          <p>Designed with Luxury & Precision</p>
+        {/* Credits */}
+        <div className="w-full pt-10 border-t border-border flex flex-col md:flex-row justify-center items-center gap-4 text-muted-foreground/60 text-[10px] uppercase tracking-[0.3em] font-medium">
+          <p>© {new Date().getFullYear()} Ayssar Tarabay. All rights reserved.</p>
         </div>
       </div>
     </footer>
