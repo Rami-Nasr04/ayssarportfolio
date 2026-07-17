@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ayssartarabaytattoo.vercel.app/sitemap.xml
